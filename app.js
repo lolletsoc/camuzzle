@@ -1,14 +1,22 @@
 /**
  * app.js
  */
-var app = require('express').createServer(),
-	io = require('socket.io').listen(express);
 
-var hbs = require('hbs');
+// Define imports
+var app = require('express').createServer(), 
+	io = require('socket.io').listen(express),
+	hbs = require('hbs'),
+	redis = require('redis'),
+	url = require('url');
+
 var port = process.env.PORT || 3000;
+var redisUrl = url.parse(process.env.REDISCLOUD_URL);
 
-var mongoose = require('mongoose');
-var conn = mongoose.createConnection('mongodb://admin:admin@ds047958.mongolab.com:47958/heroku_app18466843');
+var client = redis.createClient(redisURL.port, 
+								redisURL.hostname, 
+								{no_ready_check: true});
+
+client.auth(redisURL.auth.split(":")[1]);
 
 app.set('view engine', 'html');
 app.engine('html', hbs.__express);
@@ -21,24 +29,26 @@ app.listen(port);
 
 // Define the sockets.io callbacks
 io.sockets.on('connection', function(socket) {
-	
+
 	// Define the game creation function
-	socket.on('createGame', function(data) {
-		
-		// Create the game and return the ID to the client
-		
-		
+	socket.on('requestOpponent', function(data) {
+
+		var opponent = client.get('availableClient');
+		client.get('availableClient', function (err, socketId) {
+			if (err) {
+				client.set('availableClient', socket.id, function(err) {
+					if (err) throw err;
+					console.log('Available client is now: ' + socket.id);
+				});
+			} else {
+				console.log('A client is available: ' + opponent);
+			}
+		    console.log(reply.toString()); // Will print `bar`
+		});
 	});
 });
 
 // Set the path to root
 app.get('/', function(request, response) {
 	response.render('index');
-});
-
-// Set the path to join a game
-app.get('/game/:id', function(request, response) {
-	game_id = request.params.id;
-
-	return response.send('You entered ' + game_id);
 });
