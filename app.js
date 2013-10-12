@@ -4,7 +4,7 @@
 
 // Define imports
 var express = require('express'),
-	app = express.createServer(), 
+	app = express(), 
 	io = require('socket.io').listen(app),
 	hbs = require('hbs'),
 	redis = require('redis'),
