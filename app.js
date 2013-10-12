@@ -2,17 +2,18 @@
  * app.js
  */
 
+var port = process.env.PORT || 3000;
+
 // Define imports
 var express = require('express'),
 	app = express(),
 	http = require('http'),
-	server = http.createServer(app),
+	server = http.createServer(app).listen(port),
 	io = require('socket.io').listen(server),
 	hbs = require('hbs'),
 	redis = require('redis'),
 	url = require('url');
 
-var port = process.env.PORT || 3000;
 var redisUrl = url.parse(process.env.REDIS_URL);
 
 var client = redis.createClient(redisUrl.port, 
