@@ -3,7 +3,8 @@
  */
 
 // Define imports
-var app = require('express').createServer(), 
+var express = require('express'),
+	app = express.createServer(), 
 	io = require('socket.io').listen(app),
 	hbs = require('hbs'),
 	redis = require('redis'),
