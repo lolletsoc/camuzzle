@@ -30,6 +30,11 @@ app.use(express.static('public'));
 // Begin listening to the port
 app.listen(port);
 
+io.configure(function() {
+	io.set("transports", [ "xhr-polling" ]);
+	io.set("polling duration", 10);
+});
+
 // Define the sockets.io callbacks
 io.sockets.on('connection', function(socket) {
 
