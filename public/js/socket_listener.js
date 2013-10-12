@@ -5,4 +5,8 @@ window.onload = function() {
 	socket.emit('requestOpponent', {
 		my : 'data'
 	});
+	
+	socket.on('opponent', function(data) {
+		console.log(data);
+	});
 };

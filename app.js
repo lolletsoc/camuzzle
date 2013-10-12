@@ -47,8 +47,6 @@ io.sockets.on('connection', function(socket) {
 	// Define the game creation function
 	socket.on('requestOpponent', function(data) {
 
-		console.log(socket.id);
-		var opponent = client.get('availableClient');
 		client.get('availableClient', function(err, socketId) {
 			if (err) {
 				client.set('availableClient', socket.id, function(err) {
@@ -57,7 +55,15 @@ io.sockets.on('connection', function(socket) {
 					console.log('Available client is now: ' + socket.id);
 				});
 			} else {
-				console.log('A client is available: ' + opponent);
+				/* A client is already available and we must transmit details to each */
+				console.log('A client is available: ' + socketId);
+				socket.emit('opponent', {
+					'client': socketId
+				});
+				
+				io.sockets.socket(socketId).emit('opponent', {
+					'client': socket.id
+				});
 			}
 		});
 	});
