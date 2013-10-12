@@ -10,7 +10,7 @@ var app = require('express').createServer(),
 	url = require('url');
 
 var port = process.env.PORT || 3000;
-var redisUrl = url.parse(process.env.REDISCLOUD_URL);
+var redisUrl = url.parse(process.env.REDIS_URL);
 
 var client = redis.createClient(redisURL.port, 
 								redisURL.hostname, 
