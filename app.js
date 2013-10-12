@@ -43,7 +43,6 @@ io.sockets.on('connection', function(socket) {
 			} else {
 				console.log('A client is available: ' + opponent);
 			}
-		    console.log(reply.toString()); // Will print `bar`
 		});
 	});
 });
