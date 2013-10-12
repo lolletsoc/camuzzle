@@ -2,14 +2,10 @@
  * app.js
  */
 
-var port = process.env.PORT || 3000;
-
 // Define imports
 var express = require('express'),
 	app = express(),
 	http = require('http'),
-	server = http.createServer(app).listen(port),
-	io = require('socket.io').listen(server),
 	hbs = require('hbs'),
 	redis = require('redis'),
 	url = require('url');
@@ -22,14 +18,23 @@ var client = redis.createClient(redisUrl.port,
 
 client.auth(redisUrl.auth.split(":")[1]);
 
-app.set('view engine', 'html');
-app.engine('html', hbs.__express);
+/* Configure the Express server*/
+app.configure(function() {
+	app.set('port', process.env.PORT || 3000);
+	app.set('view engine', 'html');
+	app.engine('html', hbs.__express);
+	app.use(express.static('public'));
+});
 
-// Define the static public folder for css, images, etc.
-app.use(express.static('public'));
+/* Configure the dev ENV */
+app.configure('development', function() {
+	app.use(express.errorHandler());
+});
 
-// Begin listening to the port
-app.listen(port);
+/* Create the HTTP server used by socket.io */
+var server = http.createServer(app).listen(app.get('port'), function() {
+	console.log('Express listening on ' + app.get('port'));
+}), io = require('socket.io').listen(server);
 
 io.configure(function() {
 	io.set("transports", [ "xhr-polling" ]);
@@ -42,11 +47,13 @@ io.sockets.on('connection', function(socket) {
 	// Define the game creation function
 	socket.on('requestOpponent', function(data) {
 
+		console.log(socket.id);
 		var opponent = client.get('availableClient');
-		client.get('availableClient', function (err, socketId) {
+		client.get('availableClient', function(err, socketId) {
 			if (err) {
 				client.set('availableClient', socket.id, function(err) {
-					if (err) throw err;
+					if (err)
+						throw err;
 					console.log('Available client is now: ' + socket.id);
 				});
 			} else {
