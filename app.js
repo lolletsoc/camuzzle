@@ -48,7 +48,7 @@ io.sockets.on('connection', function(socket) {
 	socket.on('requestOpponent', function(data) {
 
 		client.get('availableClient', function(err, socketId) {
-			if (err) {
+			if (socketId) {
 				client.set('availableClient', socket.id, function(err) {
 					if (err)
 						throw err;
