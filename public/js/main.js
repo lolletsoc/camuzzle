@@ -10,11 +10,10 @@ var constraints = {
 
 var localVideo = document.querySelector("localVideo");
 var remoteVideo = document.querySelector("remoteVideo");
+var socket = io.connect('http://camuzzle.herokuapp.com');
 
 // Callback on Success of the MediaStream
 function successCallback(stream) {
-
-	var socket = io.connect('http://camuzzle.herokuapp.com');
 
 	window.stream = stream;
 	if (window.URL) {
