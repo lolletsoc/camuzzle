@@ -3,22 +3,17 @@
  */
 
 // Define imports
-var express = require('express'),
-	app = express(),
-	http = require('http'),
-	hbs = require('hbs'),
-	redis = require('redis'),
-	url = require('url');
+var express = require('express'), app = express(), http = require('http'), hbs = require('hbs'), redis = require('redis'), url = require('url');
 
 var redisUrl = url.parse(process.env.REDIS_URL);
 
-var client = redis.createClient(redisUrl.port, 
-								redisUrl.hostname, 
-								{no_ready_check: true});
+var client = redis.createClient(redisUrl.port, redisUrl.hostname, {
+	no_ready_check : true
+});
 
 client.auth(redisUrl.auth.split(":")[1]);
 
-/* Configure the Express server*/
+/* Configure the Express server */
 app.configure(function() {
 	app.set('port', process.env.PORT || 3000);
 	app.set('view engine', 'html');
@@ -39,6 +34,38 @@ var server = http.createServer(app).listen(app.get('port'), function() {
 io.configure(function() {
 	io.set("transports", [ "xhr-polling" ]);
 	io.set("polling duration", 10);
+});
+
+// Define the sockets.io callbacks
+io.sockets.on('connection', function(socket) {
+
+	// Define the game creation function
+	socket.on('requestOpponent', function(data) {
+
+		client.get('availableClient', function(err, webRtcDesc) {
+			if (!webRtcDesc) {
+				client.set('availableClient', webRtcDesc, function(err) {
+					if (err)
+						throw err;
+					console.log('Available client is now: ' + webRtcDesc);
+				});
+			} else {
+				/*
+				 * A client is already available and we must transmit details to
+				 * each
+				 */
+				console.log('A client is available: ' + webRtcDesc);
+				socket.emit('opponent', {
+					'client' : webRtcDesc
+				});
+				client.del('availableClient');
+
+				io.sockets.socket(socketId).emit('opponent', {
+					'client' : webRtcDesc
+				});
+			}
+		});
+	});
 });
 
 // Set the path to root

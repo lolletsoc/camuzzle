@@ -35,38 +35,6 @@ function successCallback(stream) {
 	localPeerConnection.addStream(localStream);
 	trace("Added localStream to localPeerConnection");
 	localPeerConnection.createOffer(gotLocalDescription);
-
-	// Define the sockets.io callbacks
-	io.sockets.on('connection', function(socket) {
-
-		// Define the game creation function
-		socket.on('requestOpponent', function(data) {
-
-			client.get('availableClient', function(err, webRtcDesc) {
-				if (!webRtcDesc) {
-					client.set('availableClient', webRtcDesc, function(err) {
-						if (err)
-							throw err;
-						console.log('Available client is now: ' + webRtcDesc);
-					});
-				} else {
-					/*
-					 * A client is already available and we must transmit
-					 * details to each
-					 */
-					console.log('A client is available: ' + webRtcDesc);
-					socket.emit('opponent', {
-						'client' : webRtcDesc
-					});
-					client.del('availableClient');
-
-					io.sockets.socket(socketId).emit('opponent', {
-						'client' : webRtcDesc
-					});
-				}
-			});
-		});
-	});
 }
 
 function gotLocalDescription(description) {
