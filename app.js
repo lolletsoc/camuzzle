@@ -41,34 +41,6 @@ io.configure(function() {
 	io.set("polling duration", 10);
 });
 
-// Define the sockets.io callbacks
-io.sockets.on('connection', function(socket) {
-
-	// Define the game creation function
-	socket.on('requestOpponent', function(data) {
-
-		client.get('availableClient', function(err, socketId) {
-			if (!socketId) {
-				client.set('availableClient', socket.id, function(err) {
-					if (err)
-						throw err;
-					console.log('Available client is now: ' + socket.id);
-				});
-			} else {
-				/* A client is already available and we must transmit details to each */
-				console.log('A client is available: ' + socketId);
-				socket.emit('opponent', {
-					'client': socketId
-				});
-				
-				io.sockets.socket(socketId).emit('opponent', {
-					'client': socket.id
-				});
-			}
-		});
-	});
-});
-
 // Set the path to root
 app.get('/', function(request, response) {
 	response.render('index');
