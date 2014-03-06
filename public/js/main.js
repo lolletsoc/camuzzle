@@ -8,9 +8,26 @@ var constraints = {
 	video : true
 };
 
-var localVideo = document.querySelector("localVideo");
-var remoteVideo = document.querySelector("remoteVideo");
-var socket = io.connect('http://camuzzle.herokuapp.com');
+var DEBUG = true;
+var localVideo, remoteVideo;
+
+window.onload = function() {
+	localVideo = document.getElementById("localVideo");
+	remoteVideo = document.getElementById("remoteVideo");
+};
+
+if (!DEBUG) {
+	var socket = io.connect('http://camuzzle.herokuapp.com');
+} else {
+	var socket = io.connect('http://127.0.0.1');
+}
+
+socket.on('opponent', function(desc) {
+	console.log(desc);
+	
+	remotePeerConnection.setRemoteDescription(desc);
+	remotePeerConnection.createAnswer(gotRemoteDescription);
+});
 
 // Callback on Success of the MediaStream
 function successCallback(stream) {
@@ -23,48 +40,48 @@ function successCallback(stream) {
 	}
 	localVideo.play();
 
+	servers = {
+		"iceServers" : [ {
+			"url" : "stun:stun.l.google.com:19302"
+		} ]
+	};
+
 	localPeerConnection = new webkitRTCPeerConnection(servers);
-	trace("Created local peer connection object localPeerConnection");
+	console.log("Created local peer connection object localPeerConnection");
 	localPeerConnection.onicecandidate = gotLocalIceCandidate;
 
 	remotePeerConnection = new webkitRTCPeerConnection(servers);
-	trace("Created remote peer connection object remotePeerConnection");
+	console.log("Created remote peer connection object remotePeerConnection");
 	remotePeerConnection.onicecandidate = gotRemoteIceCandidate;
 	remotePeerConnection.onaddstream = gotRemoteStream;
 
-	localPeerConnection.addStream(localStream);
-	trace("Added localStream to localPeerConnection");
+	localPeerConnection.addStream(stream);
+	console.log("Added localStream to localPeerConnection");
 	localPeerConnection.createOffer(gotLocalDescription);
 }
 
 function gotLocalDescription(description) {
 	localPeerConnection.setLocalDescription(description);
-	trace("Offer from localPeerConnection: \n" + description.sdp);
+	console.log("Offer from localPeerConnection: \n" + description.sdp);
 
-	socket.emit('requestOpponent', {
-		'desc' : JSON.stringify(description)
-	});
-
-	remotePeerConnection.setRemoteDescription(description);
-	remotePeerConnection.createAnswer(gotRemoteDescription);
+	socket.emit('requestOpponent', description.sdp);
 }
 
 function gotRemoteDescription(description) {
 	remotePeerConnection.setLocalDescription(description);
-	trace("Answer from remotePeerConnection: \n" + description.sdp);
-	localPeerConnection.setRemoteDescription(description);
+	console.log("Answer from remotePeerConnection: \n" + description.sdp);
+	localPeerConnection.setRemoteDescription(new RTCSessionDescription(description));
 }
 
 function gotRemoteStream(event) {
 	remoteVideo.src = URL.createObjectURL(event.stream);
-	trace("Received remote stream");
+	console.log("Received remote stream");
 }
 
 function gotLocalIceCandidate(event) {
 	if (event.candidate) {
 		remotePeerConnection.addIceCandidate(new RTCIceCandidate(
 				event.candidate));
-		trace("Local ICE candidate: \n" + event.candidate.candidate);
 	}
 }
 
@@ -72,7 +89,7 @@ function gotRemoteIceCandidate(event) {
 	if (event.candidate) {
 		localPeerConnection
 				.addIceCandidate(new RTCIceCandidate(event.candidate));
-		trace("Remote ICE candidate: \n " + event.candidate.candidate);
+		console.log("Remote ICE candidate: \n " + event.candidate.candidate);
 	}
 }
 

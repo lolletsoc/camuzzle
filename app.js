@@ -5,13 +5,20 @@
 // Define imports
 var express = require('express'), app = express(), http = require('http'), hbs = require('hbs'), redis = require('redis'), url = require('url');
 
-var redisUrl = url.parse(process.env.REDIS_URL);
+var DEBUG = true;
 
-var client = redis.createClient(redisUrl.port, redisUrl.hostname, {
-	no_ready_check : true
-});
+if (!DEBUG) {
+	var redisUrl = url.parse(process.env.REDIS_URL);
+	var client = redis.createClient(redisUrl.port, redisUrl.hostname, {
+		no_ready_check : true
+	});
+} else {
+	var client = redis.createClient();
+}
 
-client.auth(redisUrl.auth.split(":")[1]);
+if (!DEBUG) {
+	client.auth(redisUrl.auth.split(":")[1]);
+}
 
 /* Configure the Express server */
 app.configure(function() {
@@ -31,10 +38,10 @@ var server = http.createServer(app).listen(app.get('port'), function() {
 	console.log('Express listening on ' + app.get('port'));
 }), io = require('socket.io').listen(server);
 
-io.configure(function() {
-	io.set("transports", [ "xhr-polling" ]);
-	io.set("polling duration", 10);
-});
+/*
+ * io.configure(function() { io.set("transports", [ "xhr-polling" ]);
+ * io.set("polling duration", 10); });
+ */
 
 // Define the sockets.io callbacks
 io.sockets.on('connection', function(socket) {
@@ -44,10 +51,10 @@ io.sockets.on('connection', function(socket) {
 
 		client.get('availableClient', function(err, webRtcDesc) {
 			if (!webRtcDesc) {
-				client.set('availableClient', webRtcDesc, function(err) {
+				client.set('availableClient', data, function(err) {
 					if (err)
 						throw err;
-					console.log('Available client is now: ' + webRtcDesc);
+					console.log('Available client is now: ' + data);
 				});
 			} else {
 				/*
@@ -55,14 +62,9 @@ io.sockets.on('connection', function(socket) {
 				 * each
 				 */
 				console.log('A client is available: ' + webRtcDesc);
-				socket.emit('opponent', {
-					'client' : webRtcDesc
-				});
 				client.del('availableClient');
 
-				io.sockets.socket(socketId).emit('opponent', {
-					'client' : webRtcDesc
-				});
+				io.sockets.socket(socket.id).emit('opponent', webRtcDesc);
 			}
 		});
 	});
