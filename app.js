@@ -3,9 +3,14 @@
  */
 
 // Define imports
-var express = require('express'), app = express(), http = require('http'), hbs = require('hbs'), redis = require('redis'), url = require('url');
+var express = require('express');
+var app = express();
+var http = require('http');
+var hbs = require('hbs');
+var redis = require('redis');
+var url = require('url');
 
-var DEBUG = true;
+var DEBUG = false;
 
 if (!DEBUG) {
 	var redisUrl = url.parse(process.env.REDIS_URL);

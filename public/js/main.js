@@ -8,7 +8,7 @@ var constraints = {
 	video : true
 };
 
-var DEBUG = true;
+var DEBUG = false;
 var localVideo, remoteVideo;
 
 window.onload = function() {
