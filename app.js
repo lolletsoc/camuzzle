@@ -43,11 +43,6 @@ var server = http.createServer(app).listen(app.get('port'), function() {
 	console.log('Express listening on ' + app.get('port'));
 }), io = require('socket.io').listen(server);
 
-/*
- * io.configure(function() { io.set("transports", [ "xhr-polling" ]);
- * io.set("polling duration", 10); });
- */
-
 // Define the sockets.io callbacks
 io.sockets.on('connection', function(socket) {
 

@@ -25,7 +25,9 @@ if (!DEBUG) {
 socket.on('opponent', function(desc) {
 	console.log(desc);
 	
-	remotePeerConnection.setRemoteDescription(desc);
+	var sdp = JSON.parse(desc);
+	
+	remotePeerConnection.setRemoteDescription(sdp);
 	remotePeerConnection.createAnswer(gotRemoteDescription);
 });
 
@@ -63,8 +65,10 @@ function successCallback(stream) {
 function gotLocalDescription(description) {
 	localPeerConnection.setLocalDescription(description);
 	console.log("Offer from localPeerConnection: \n" + description.sdp);
-
-	socket.emit('requestOpponent', description.sdp);
+	
+	var sdp = JSON.stringify(description.sdp);
+	
+	socket.emit('requestOpponent', sdp);
 }
 
 function gotRemoteDescription(description) {
