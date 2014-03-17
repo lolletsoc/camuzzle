@@ -139,33 +139,40 @@ var y;
  * container
  */
 var canvasMatrix = [
-		[document.createElement('canvas'), document.createElement('canvas'), document.createElement('canvas'), document.createElement('canvas')],
-		[document.createElement('canvas'), document.createElement('canvas'), document.createElement('canvas'), document.createElement('canvas')],
-		[document.createElement('canvas'), document.createElement('canvas'), document.createElement('canvas'), document.createElement('canvas')],
-		[document.createElement('canvas'), document.createElement('canvas'), document.createElement('canvas'), document.createElement('canvas')],
-];
+		[ document.createElement('canvas'), document.createElement('canvas'),
+				document.createElement('canvas'),
+				document.createElement('canvas') ],
+		[ document.createElement('canvas'), document.createElement('canvas'),
+				document.createElement('canvas'),
+				document.createElement('canvas') ],
+		[ document.createElement('canvas'), document.createElement('canvas'),
+				document.createElement('canvas'),
+				document.createElement('canvas') ],
+		[ document.createElement('canvas'), document.createElement('canvas'),
+				document.createElement('canvas'),
+				document.createElement('canvas') ], ];
 
 function calculatePieceSizes() {
-	x = Math.floor(localVideo.videoWidth / canvasMatrix.length);
-	y = Math.floor(localVideo.videoHeight / canvasMatrix.length);
+	x = Math.floor(localVideo.videoWidth / 4);
+	y = Math.floor(localVideo.videoHeight / 4);
 }
 
 function createIsotopeContainer() {
-	var $container = $('#localPieceContainer').isotope({
-    layoutMode: 'fitColumns',
-		itemSelector: '.item',
-    resizesContainer: false
-  });
+	$('#localPieceContainer').isotope({
+		layoutMode : 'fitColumns',
+		itemSelector : '.item',
+		resizesContainer : false
+	});
 }
 
 function addElementsToIsotopeContainer() {
 	var $container = $('#localPieceContainer');
-	var len = canvasMatrix.length
+	var len = canvasMatrix.length;
 
 	for (var i = 0; i < len; i++) {
-		for (var k = 0;k < len; k++) {
+		for (var k = 0; k < len; k++) {
 			var canvas = canvasMatrix[i][k];
-			$container.append(canvas).isotope( 'appended', canvas);
+			$container.append(canvas).isotope('appended', canvas);
 		}
 	}
 }
@@ -174,14 +181,14 @@ function drawPiecesOfVideo() {
 	// TODO: Requires refactoring - must change name.
 	var dy;
 	var dx;
-	var len = canvasMatrix.length
+	var len = canvasMatrix.length;
 	for (var i = 0; i < len; i++) {
 		dx = x * i;
 		// Rows
 		for (var k = 0; k < len; k++) {
 			dy = y * k;
-			canvasMatrix[i][k].getContext('2d').drawImage(localVideo, dx,
-					dy, x, y, 0, 0, x, y);
+			canvasMatrix[i][k].getContext('2d').drawImage(localVideo, dx, dy,
+					x, y, 0, 0, x, y);
 		}
 	}
 }
@@ -190,12 +197,6 @@ function handleUserMedia(stream) {
 	localStream = stream;
 	attachMediaStream(localVideo, stream);
 
-	createIsotopeContainer();
-	addElementsToIsotopeContainer();
-	calculatePieceSizes();
-	setInterval(drawPiecesOfVideo, 33);
-
-	console.log('Adding local stream.');
 	sendMessage('got user media');
 	if (isInitiator) {
 		maybeStart();
@@ -206,13 +207,17 @@ function handleUserMediaError(error) {
 	console.log('getUserMedia error: ', error);
 }
 
-var constraints = {
+getUserMedia({
 	video : true
-};
+}, handleUserMedia, handleUserMediaError);
 
-getUserMedia(constraints, handleUserMedia, handleUserMediaError);
-console.log('Getting user media with constraints', constraints);
+// Ensure that we only run when the video has fully loaded
+localVideo.addEventListener("playing", function () {
+	createIsotopeContainer();
+	addElementsToIsotopeContainer();
+	calculatePieceSizes();
 	setInterval(drawPiecesOfVideo, FPS);
+}, false);
 
 function maybeStart() {
 	if (!isStarted && localStream && isChannelReady) {
