@@ -177,6 +177,17 @@ function addElementsToIsotopeContainer() {
 	}
 }
 
+function modifyIsotopeWidth(width, height) {
+	// $('#localPieceContainer').isotope('reLayout', function() {
+	// console.log('ReLayout called');
+	// });
+
+	$('#localPieceContainer').css({
+		height : height,
+		width : width
+	});
+}
+
 function drawPiecesOfVideo() {
 	// TODO: Requires refactoring - must change name.
 	var dy;

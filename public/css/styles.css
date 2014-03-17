@@ -1,8 +1,3 @@
-#container {
-  /* either of these will work for horizontal Isotope layouts */
-  height: 480px;
-}
-
 /**** Isotope Filtering ****/
 
 .isotope-item {
