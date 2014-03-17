@@ -1,6 +1,8 @@
 'use strict';
 
-var FPS = 33;
+var FPS = 33; // Milliseconds between each draw call
+var GUTTER = 10; // Space between each element in the grid
+var GRID_SIZE = 10;
 
 var sendChannel;
 
@@ -118,8 +120,6 @@ var remoteVideo = document.querySelector('#remoteVideo');
 var localVideoPieceArray;
 var remoteVideoPieceArray;
 
-var numberOfPieces = 4;
-
 function randomSort(a, b) {
 	// TODO: This is poor, change it.
 	var temp = Math.floor(Math.random() * 10);
@@ -128,9 +128,6 @@ function randomSort(a, b) {
 	return (isOddOrEven * isPosOrNeg);
 }
 
-var localVideoRandomPieces = new Array(0, 1, 2, 3).sort(randomSort);
-var gridWays = localVideoRandomPieces.length / 2;
-
 var x;
 var y;
 
@@ -138,36 +135,41 @@ var y;
  * Canvas matrix defines a [[], []] of row,column mappings against the canvas
  * container
  */
-var canvasMatrix = [
-		[ document.createElement('canvas'), document.createElement('canvas'),
-				document.createElement('canvas'),
-				document.createElement('canvas') ],
-		[ document.createElement('canvas'), document.createElement('canvas'),
-				document.createElement('canvas'),
-				document.createElement('canvas') ],
-		[ document.createElement('canvas'), document.createElement('canvas'),
-				document.createElement('canvas'),
-				document.createElement('canvas') ],
-		[ document.createElement('canvas'), document.createElement('canvas'),
-				document.createElement('canvas'),
-				document.createElement('canvas') ], ];
+var canvasMatrix;
+
+function createCanvasMatrix(gridSize) {
+	canvasMatrix = [];
+	for (var i = 0; i < gridSize; i++) {
+		canvasMatrix.push([]);
+		for (var k = 0; k < gridSize; k++) {
+			var canvasElement = document.createElement('canvas');
+			canvasElement.width = x;
+			canvasElement.height = y;
+			canvasMatrix[i].push(canvasElement);
+		}
+	}
+}
 
 function calculatePieceSizes(gridSize) {
 	x = Math.floor(localVideo.videoWidth / gridSize);
 	y = Math.floor(localVideo.videoHeight / gridSize);
+
+	console.log(x + ' x ' + y);
 }
 
 function createIsotopeContainer() {
 	$('#localPieceContainer').isotope({
-		layoutMode : 'fitColumns',
+		layoutMode : 'masonry',
+		resizable : false,
 		itemSelector : '.item',
-		resizesContainer : false
+		resizesContainer : false,
+		animationEngine : 'best-available'
 	});
 }
 
 function addElementsToIsotopeContainer() {
 	var $container = $('#localPieceContainer');
-	var len = canvasMatrix.length;
+	var len = GRID_SIZE;
 
 	for (var i = 0; i < len; i++) {
 		for (var k = 0; k < len; k++) {
@@ -192,7 +194,7 @@ function drawPiecesOfVideo() {
 	// TODO: Requires refactoring - must change name.
 	var dy;
 	var dx;
-	var len = canvasMatrix.length;
+	var len = GRID_SIZE;
 	for (var i = 0; i < len; i++) {
 		dx = x * i;
 		// Rows
@@ -224,9 +226,11 @@ getUserMedia({
 
 // Ensure that we only run when the video has fully loaded
 localVideo.addEventListener("playing", function() {
+	calculatePieceSizes(GRID_SIZE);
+	createCanvasMatrix(GRID_SIZE);
 	createIsotopeContainer();
 	addElementsToIsotopeContainer();
-	calculatePieceSizes(canvasMatrix.length);
+	modifyIsotopeWidth(GRID_SIZE * x, GRID_SIZE * y);
 	setInterval(drawPiecesOfVideo, FPS);
 }, false);
 
