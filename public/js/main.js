@@ -1,5 +1,7 @@
 'use strict';
 
+var FPS = 33;
+
 var sendChannel;
 
 var isChannelReady;
@@ -210,6 +212,7 @@ var constraints = {
 
 getUserMedia(constraints, handleUserMedia, handleUserMediaError);
 console.log('Getting user media with constraints', constraints);
+	setInterval(drawPiecesOfVideo, FPS);
 
 function maybeStart() {
 	if (!isStarted && localStream && isChannelReady) {
