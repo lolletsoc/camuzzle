@@ -49,7 +49,7 @@ if (room === '') {
 	//
 }
 
-var socket = io.connect('http://127.0.0.1:3000');
+var socket = io.connect('http://camuzzle.herokuapp.com');
 
 if (room !== '') {
 	console.log('Create or join room', room);
@@ -121,7 +121,7 @@ var remoteVideoPieceArray;
 var numberOfPieces = 4;
 
 function randomSort(a, b) {
-	// TODO: This is shit, change it.
+	// TODO: This is poor, change it.
 	var temp = Math.floor(Math.random() * 10);
 	var isOddOrEven = temp % 2;
 	var isPosOrNeg = temp > 5 ? 1 : -1;
@@ -152,9 +152,9 @@ var canvasMatrix = [
 				document.createElement('canvas'),
 				document.createElement('canvas') ], ];
 
-function calculatePieceSizes() {
-	x = Math.floor(localVideo.videoWidth / 4);
-	y = Math.floor(localVideo.videoHeight / 4);
+function calculatePieceSizes(gridSize) {
+	x = Math.floor(localVideo.videoWidth / gridSize);
+	y = Math.floor(localVideo.videoHeight / gridSize);
 }
 
 function createIsotopeContainer() {
@@ -212,12 +212,14 @@ getUserMedia({
 }, handleUserMedia, handleUserMediaError);
 
 // Ensure that we only run when the video has fully loaded
-localVideo.addEventListener("playing", function () {
+localVideo.addEventListener("playing", function() {
 	createIsotopeContainer();
 	addElementsToIsotopeContainer();
-	calculatePieceSizes();
+	calculatePieceSizes(canvasMatrix.length);
 	setInterval(drawPiecesOfVideo, FPS);
 }, false);
+
+// ///////////////////////////////////////////////////////
 
 function maybeStart() {
 	if (!isStarted && localStream && isChannelReady) {
@@ -233,8 +235,6 @@ function maybeStart() {
 window.onbeforeunload = function(e) {
 	sendMessage('bye');
 };
-
-// ///////////////////////////////////////////////////////
 
 function createPeerConnection() {
 	try {
