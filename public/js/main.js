@@ -159,7 +159,7 @@ function setSortDataOnContainer() {
         }
     });
 
-    $('#localPieceContainer').isotope({sortBy: 'id'});
+    $('#localPieceContainer').isotope({sortBy: 'random'});
 }
 
 function calculatePieceSizes(gridSize) {
