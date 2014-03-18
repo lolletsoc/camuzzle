@@ -224,15 +224,17 @@ getUserMedia({
 	video : true
 }, handleUserMedia, handleUserMediaError);
 
-// Ensure that we only run when the video has fully loaded
-localVideo.addEventListener("playing", function() {
+function init() {
 	calculatePieceSizes(GRID_SIZE);
 	createCanvasMatrix(GRID_SIZE);
 	createIsotopeContainer();
 	addElementsToIsotopeContainer();
 	modifyIsotopeWidth(GRID_SIZE * x, GRID_SIZE * y);
 	setInterval(drawPiecesOfVideo, FPS);
-}, false);
+}
+
+// Ensure that we only run when the video has fully loaded
+localVideo.addEventListener("playing", init, false);
 
 // ///////////////////////////////////////////////////////
 
