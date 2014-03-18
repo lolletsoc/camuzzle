@@ -1,11 +1,14 @@
 {
-   "name": "camuzzle",
-   "description": "Camuzzle Node Express",
-   "version": "0.0.1",
-   "dependencies": {
-      "express": "3.x",
-      "redis": "latest",
-	  "hbs":"latest",
-	  "socket.io": "latest"
-   }
+    "name": "camuzzle",
+    "description": "Camuzzle - Puzzle Game!",
+    "version": "0.0.1",
+    "private": true,
+    "scripts": {
+        "start": "node app.js"
+    },
+    "dependencies": {
+        "express": "3.4.8",
+        "hbs": "latest",
+        "socket.io": "latest"
+    }
 }
